@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Asset Register</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="bg-gray-100">
+  <div class="container mx-auto px-4 py-8">
+    <!-- Header -->
+    <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+      <div class="flex justify-between items-start">
+        <div>
+          <h1 class="text-3xl font-bold text-gray-800 mb-2">
+            <i class="fas fa-box text-blue-600"></i> Asset Register
+          </h1>
+          <p class="text-gray-600">Manage and track your organization's assets</p>
+        </div>
+        <button 
+          onclick="openSettingsModal()" 
+          class="text-gray-600 hover:text-gray-800 transition"
+          title="Settings"
+        >
+          <i class="fas fa-cog text-2xl"></i>
+        </button>
+      </div>
+    </div>
+
+    <!-- Statistics Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+      <div class="bg-white rounded-lg shadow-md p-6">
+        <div class="flex items-center">
+          <div class="bg-blue-100 rounded-full p-3 mr-4">
+            <i class="fas fa-boxes text-blue-600 text-2xl"></i>
+          </div>
+          <div>
+            <p class="text-gray-600 text-sm">Total Assets</p>
+            <p class="text-2xl font-bold text-gray-800"><%= totalAssets %></p>
+          </div>
+        </div>
+      </div>
+      <div class="bg-white rounded-lg shadow-md p-6">
+        <div class="flex items-center">
+          <div class="bg-green-100 rounded-full p-3 mr-4">
+            <i class="fas fa-dollar-sign text-green-600 text-2xl"></i>
+          </div>
+          <div>
+            <p class="text-gray-600 text-sm">Total Value</p>
+            <p class="text-2xl font-bold text-gray-800">£<%= totalValue.toLocaleString() %></p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Search and Add Button -->
+    <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+      <div class="flex flex-col md:flex-row gap-4 items-center justify-between">
+        <form action="/" method="GET" class="flex-1 w-full md:w-auto">
+          <div class="relative">
+            <input 
+              type="text" 
+              name="search" 
+              value="<%= search %>"
+              placeholder="Search assets..." 
+              class="w-full px-4 py-2 pl-10 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+            <i class="fas fa-search absolute left-3 top-3 text-gray-400"></i>
+          </div>
+        </form>
+        <button 
+          onclick="openAddModal()" 
+          class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg flex items-center gap-2 transition whitespace-nowrap"
+        >
+          <i class="fas fa-plus"></i> Add Asset
+        </button>
+      </div>
+    </div>
+
+    <!-- Assets Table -->
+    <div class="bg-white rounded-lg shadow-md overflow-hidden">
+      <div class="overflow-x-auto">
+        <table class="w-full">
+          <thead class="bg-gray-50 border-b border-gray-200">
+            <tr>
+              <th class="px-6 py-3 text-left">
+                <a href="/?sort=id&order=<%= sort === 'id' && order === 'asc' ? 'desc' : 'asc' %>&search=<%= search %>" 
+                   class="text-xs font-medium text-gray-500 uppercase tracking-wider hover:text-gray-700 flex items-center gap-1">
+                  ID 
+                  <% if (sort === 'id') { %>
+                    <i class="fas fa-sort-<%= order === 'asc' ? 'up' : 'down' %>"></i>
+                  <% } else { %>
+                    <i class="fas fa-sort text-gray-300"></i>
+                  <% } %>
+                </a>
+              </th>
+              <th class="px-6 py-3 text-left">
+                <a href="/?sort=name&order=<%= sort === 'name' && order === 'asc' ? 'desc' : 'asc' %>&search=<%= search %>" 
+                   class="text-xs font-medium text-gray-500 uppercase tracking-wider hover:text-gray-700 flex items-center gap-1">
+                  Name
+                  <% if (sort === 'name') { %>
+                    <i class="fas fa-sort-<%= order === 'asc' ? 'up' : 'down' %>"></i>
+                  <% } else { %>
+                    <i class="fas fa-sort text-gray-300"></i>
+                  <% } %>
+                </a>
+              </th>
+              <th class="px-6 py-3 text-left">
+                <a href="/?sort=category&order=<%= sort === 'category' && order === 'asc' ? 'desc' : 'asc' %>&search=<%= search %>" 
+                   class="text-xs font-medium text-gray-500 uppercase tracking-wider hover:text-gray-700 flex items-center gap-1">
+                  Category
+                  <% if (sort === 'category') { %>
+                    <i class="fas fa-sort-<%= order === 'asc' ? 'up' : 'down' %>"></i>
+                  <% } else { %>
+                    <i class="fas fa-sort text-gray-300"></i>
+                  <% } %>
+                </a>
+              </th>
+              <th class="px-6 py-3 text-left">
+                <a href="/?sort=serialNumber&order=<%= sort === 'serialNumber' && order === 'asc' ? 'desc' : 'asc' %>&search=<%= search %>" 
+                   class="text-xs font-medium text-gray-500 uppercase tracking-wider hover:text-gray-700 flex items-center gap-1">
+                  Serial #
+                  <% if (sort === 'serialNumber') { %>
+                    <i class="fas fa-sort-<%= order === 'asc' ? 'up' : 'down' %>"></i>
+                  <% } else { %>
+                    <i class="fas fa-sort text-gray-300"></i>
+                  <% } %>
+                </a>
+              </th>
+              <th class="px-6 py-3 text-left">
+                <a href="/?sort=purchaseDate&order=<%= sort === 'purchaseDate' && order === 'asc' ? 'desc' : 'asc' %>&search=<%= search %>" 
+                   class="text-xs font-medium text-gray-500 uppercase tracking-wider hover:text-gray-700 flex items-center gap-1">
+                  Purchase Date
+                  <% if (sort === 'purchaseDate') { %>
+                    <i class="fas fa-sort-<%= order === 'asc' ? 'up' : 'down' %>"></i>
+                  <% } else { %>
+                    <i class="fas fa-sort text-gray-300"></i>
+                  <% } %>
+                </a>
+              </th>
+              <th class="px-6 py-3 text-left">
+                <a href="/?sort=value&order=<%= sort === 'value' && order === 'asc' ? 'desc' : 'asc' %>&search=<%= search %>" 
+                   class="text-xs font-medium text-gray-500 uppercase tracking-wider hover:text-gray-700 flex items-center gap-1">
+                  Value
+                  <% if (sort === 'value') { %>
+                    <i class="fas fa-sort-<%= order === 'asc' ? 'up' : 'down' %>"></i>
+                  <% } else { %>
+                    <i class="fas fa-sort text-gray-300"></i>
+                  <% } %>
+                </a>
+              </th>
+              <th class="px-6 py-3 text-left">
+                <a href="/?sort=status&order=<%= sort === 'status' && order === 'asc' ? 'desc' : 'asc' %>&search=<%= search %>" 
+                   class="text-xs font-medium text-gray-500 uppercase tracking-wider hover:text-gray-700 flex items-center gap-1">
+                  Status
+                  <% if (sort === 'status') { %>
+                    <i class="fas fa-sort-<%= order === 'asc' ? 'up' : 'down' %>"></i>
+                  <% } else { %>
+                    <i class="fas fa-sort text-gray-300"></i>
+                  <% } %>
+                </a>
+              </th>
+              <th class="px-6 py-3 text-left">
+                <a href="/?sort=location&order=<%= sort === 'location' && order === 'asc' ? 'desc' : 'asc' %>&search=<%= search %>" 
+                   class="text-xs font-medium text-gray-500 uppercase tracking-wider hover:text-gray-700 flex items-center gap-1">
+                  Location
+                  <% if (sort === 'location') { %>
+                    <i class="fas fa-sort-<%= order === 'asc' ? 'up' : 'down' %>"></i>
+                  <% } else { %>
+                    <i class="fas fa-sort text-gray-300"></i>
+                  <% } %>
+                </a>
+              </th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Actions
+              </th>
+            </tr>
+          </thead>
+          <tbody class="bg-white divide-y divide-gray-200">
+            <% if (assets.length === 0) { %>
+              <tr>
+                <td colspan="9" class="px-6 py-12 text-center text-gray-500">
+                  <i class="fas fa-inbox text-4xl mb-2 block"></i>
+                  <p>No assets found</p>
+                </td>
+              </tr>
+            <% } else { %>
+              <% assets.forEach(asset => { %>
+                <tr class="hover:bg-gray-50 transition">
+                  <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    <%= asset.id %>
+                  </td>
+                  <td class="px-6 py-4 whitespace-nowrap">
+                    <div class="text-sm font-medium text-gray-900"><%= asset.name %></div>
+                  </td>
+                  <td class="px-6 py-4 whitespace-nowrap">
+                    <span class="px-2 py-1 text-xs rounded-full bg-blue-100 text-blue-800">
+                      <%= asset.category %>
+                    </span>
+                  </td>
+                  <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    <%= asset.serialNumber %>
+                  </td>
+                  <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    <%= new Date(asset.purchaseDate).toLocaleDateString() %>
+                  </td>
+                  <td class="px-6 py-4 whitespace-nowrap text-sm font-semibold text-gray-900">
+                    £<%= asset.value.toLocaleString() %>
+                  </td>
+                  <td class="px-6 py-4 whitespace-nowrap">
+                    <span class="px-2 py-1 text-xs rounded-full <%= asset.status === 'Active' ? 'bg-green-100 text-green-800' : asset.status === 'Under Maintenance' ? 'bg-yellow-100 text-yellow-800' : 'bg-red-100 text-red-800' %>">
+                      <%= asset.status %>
+                    </span>
+                  </td>
+                  <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    <%= asset.location %>
+                  </td>
+                  <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                    <button 
+                      onclick="openEditModal(<%= asset.id %>)" 
+                      class="text-blue-600 hover:text-blue-900 mr-3"
+                      title="Edit"
+                    >
+                      <i class="fas fa-edit"></i>
+                    </button>
+                    <a 
+                      href="/assets/<%= asset.id %>/label" 
+                      target="_blank"
+                      class="text-green-600 hover:text-green-900 mr-3"
+                      title="Print Label"
+                    >
+                      <i class="fas fa-tag"></i>
+                    </a>
+                    <button 
+                      onclick="confirmDelete(<%= asset.id %>, '<%= asset.name %>')" 
+                      class="text-red-600 hover:text-red-900"
+                      title="Delete"
+                    >
+                      <i class="fas fa-trash"></i>
+                    </button>
+                  </td>
+                </tr>
+              <% }) %>
+            <% } %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Add/Edit Modal -->
+  <div id="assetModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden overflow-y-auto h-full w-full z-50">
+    <div class="relative top-20 mx-auto p-5 border w-full max-w-2xl shadow-lg rounded-md bg-white">
+      <div class="flex justify-between items-center mb-4">
+        <h3 id="modalTitle" class="text-xl font-semibold text-gray-900">Add New Asset</h3>
+        <button onclick="closeModal()" class="text-gray-400 hover:text-gray-600">
+          <i class="fas fa-times text-2xl"></i>
+        </button>
+      </div>
+      <form id="assetForm" method="POST" action="/assets">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Name</label>
+            <input 
+              type="text" 
+              name="name" 
+              id="name"
+              required 
+              class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Category</label>
+            <select 
+              name="category" 
+              id="category"
+              required 
+              class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              <option value="Electronics">Electronics</option>
+              <option value="Furniture">Furniture</option>
+              <option value="Vehicle">Vehicle</option>
+              <option value="Equipment">Equipment</option>
+              <option value="Other">Other</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Serial Number</label>
+            <input 
+              type="text" 
+              name="serialNumber" 
+              id="serialNumber"
+              required 
+              class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Purchase Date</label>
+            <input 
+              type="date" 
+              name="purchaseDate" 
+              id="purchaseDate"
+              required 
+              class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Value (£)</label>
+            <input 
+              type="number" 
+              name="value" 
+              id="value"
+              step="0.01" 
+              required 
+              class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Status</label>
+            <select 
+              name="status" 
+              id="status"
+              required 
+              class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              <option value="Active">Active</option>
+              <option value="Under Maintenance">Under Maintenance</option>
+              <option value="Retired">Retired</option>
+            </select>
+          </div>
+          <div class="md:col-span-2">
+            <label class="block text-sm font-medium text-gray-700 mb-1">Location</label>
+            <input 
+              type="text" 
+              name="location" 
+              id="location"
+              required 
+              class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+          </div>
+        </div>
+        <div class="flex justify-end gap-3 mt-6">
+          <button 
+            type="button" 
+            onclick="closeModal()" 
+            class="px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400 transition"
+          >
+            Cancel
+          </button>
+          <button 
+            type="submit" 
+            class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition"
+          >
+            <i class="fas fa-save mr-1"></i> Save Asset
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Delete Confirmation Modal -->
+  <div id="deleteModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden overflow-y-auto h-full w-full z-50">
+    <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+      <div class="text-center">
+        <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-red-100 mb-4">
+          <i class="fas fa-exclamation-triangle text-red-600 text-2xl"></i>
+        </div>
+        <h3 class="text-lg font-semibold text-gray-900 mb-2">Delete Asset</h3>
+        <p class="text-sm text-gray-500 mb-4">
+          Are you sure you want to delete "<span id="deleteAssetName" class="font-semibold"></span>"? This action cannot be undone.
+        </p>
+        <form id="deleteForm" method="POST">
+          <div class="flex justify-center gap-3">
+            <button 
+              type="button" 
+              onclick="closeDeleteModal()" 
+              class="px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400 transition"
+            >
+              Cancel
+            </button>
+            <button 
+              type="submit" 
+              class="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition"
+            >
+              <i class="fas fa-trash mr-1"></i> Delete
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Settings Modal -->
+  <div id="settingsModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden overflow-y-auto h-full w-full z-50">
+    <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+      <div class="flex justify-between items-center mb-4">
+        <h3 class="text-xl font-semibold text-gray-900">Settings</h3>
+        <button onclick="closeSettingsModal()" class="text-gray-400 hover:text-gray-600">
+          <i class="fas fa-times text-2xl"></i>
+        </button>
+      </div>
+      <form id="settingsForm" onsubmit="saveSettings(event)">
+        <div class="mb-4">
+          <label class="block text-sm font-medium text-gray-700 mb-2">Company Name</label>
+          <input 
+            type="text" 
+            id="companyNameInput"
+            value="<%= companyName %>"
+            required 
+            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+          >
+          <p class="text-xs text-gray-500 mt-1">This name will appear on asset labels</p>
+        </div>
+        <div class="flex justify-end gap-3">
+          <button 
+            type="button" 
+            onclick="closeSettingsModal()" 
+            class="px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400 transition"
+          >
+            Cancel
+          </button>
+          <button 
+            type="submit" 
+            class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition"
+          >
+            <i class="fas fa-save mr-1"></i> Save
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    function openAddModal() {
+      document.getElementById('modalTitle').textContent = 'Add New Asset';
+      document.getElementById('assetForm').action = '/assets';
+      document.getElementById('assetForm').reset();
+      document.getElementById('assetModal').classList.remove('hidden');
+    }
+
+    function openEditModal(id) {
+      fetch(`/assets/${id}`)
+        .then(res => res.json())
+        .then(asset => {
+          document.getElementById('modalTitle').textContent = 'Edit Asset';
+          document.getElementById('assetForm').action = `/assets/${id}/update`;
+          document.getElementById('name').value = asset.name;
+          document.getElementById('category').value = asset.category;
+          document.getElementById('serialNumber').value = asset.serialNumber;
+          document.getElementById('purchaseDate').value = asset.purchaseDate;
+          document.getElementById('value').value = asset.value;
+          document.getElementById('status').value = asset.status;
+          document.getElementById('location').value = asset.location;
+          document.getElementById('assetModal').classList.remove('hidden');
+        });
+    }
+
+    function closeModal() {
+      document.getElementById('assetModal').classList.add('hidden');
+    }
+
+    function confirmDelete(id, name) {
+      document.getElementById('deleteAssetName').textContent = name;
+      document.getElementById('deleteForm').action = `/assets/${id}/delete`;
+      document.getElementById('deleteModal').classList.remove('hidden');
+    }
+
+    function closeDeleteModal() {
+      document.getElementById('deleteModal').classList.add('hidden');
+    }
+
+    function openSettingsModal() {
+      document.getElementById('settingsModal').classList.remove('hidden');
+    }
+
+    function closeSettingsModal() {
+      document.getElementById('settingsModal').classList.add('hidden');
+    }
+
+    function saveSettings(event) {
+      event.preventDefault();
+      const companyName = document.getElementById('companyNameInput').value;
+      
+      fetch('/settings/company', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ name: companyName })
+      })
+      .then(res => res.json())
+      .then(data => {
+        if (data.success) {
+          closeSettingsModal();
+          location.reload();
+        }
+      });
+    }
+
+    // Close modals when clicking outside
+    window.onclick = function(event) {
+      const assetModal = document.getElementById('assetModal');
+      const deleteModal = document.getElementById('deleteModal');
+      const settingsModal = document.getElementById('settingsModal');
+      if (event.target === assetModal) {
+        closeModal();
+      }
+      if (event.target === deleteModal) {
+        closeDeleteModal();
+      }
+      if (event.target === settingsModal) {
+        closeSettingsModal();
+      }
+    }
+  </script>
+</body>
+</html>

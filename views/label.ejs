@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Asset Label - <%= asset.name %></title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
+  <style>
+    @page {
+      size: 4in 6in;
+      margin: 0;
+    }
+    
+    @media print {
+      html, body {
+        width: 4in;
+        height: 6in;
+        margin: 0;
+        padding: 0;
+      }
+      .no-print {
+        display: none !important;
+      }
+      .label-container {
+        width: 4in;
+        height: 6in;
+        margin: 0;
+        padding: 0;
+        page-break-after: always;
+      }
+      .label {
+        width: 4in;
+        height: 6in;
+        margin: 0;
+        padding: 0.25in;
+        box-sizing: border-box;
+        border: none !important;
+        box-shadow: none !important;
+      }
+    }
+    
+    @media screen {
+      /* 4x6 label is 4 inches wide by 6 inches tall */
+      .label {
+        width: 4in;
+        height: 6in;
+        padding: 0.25in;
+        box-sizing: border-box;
+      }
+    }
+  </style>
+</head>
+<body class="bg-gray-100">
+  <!-- Back button -->
+  <div class="no-print fixed top-4 left-4 z-10">
+    <a 
+      href="/" 
+      class="bg-gray-600 hover:bg-gray-700 text-white px-6 py-3 rounded-lg shadow-lg flex items-center gap-2"
+    >
+      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+      </svg>
+      Back
+    </a>
+  </div>
+  
+  <!-- Print button -->
+  <div class="no-print fixed top-4 right-4 z-10">
+    <button 
+      onclick="window.print()" 
+      class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg shadow-lg flex items-center gap-2"
+    >
+      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path>
+      </svg>
+      Print Label
+    </button>
+  </div>
+
+  <div class="flex items-center justify-center min-h-screen p-8">
+    <div class="label-container">
+      <div class="label bg-white border-2 border-gray-300 rounded-lg shadow-lg flex flex-col">
+        <!-- Header -->
+        <div class="text-center border-b-2 border-gray-300 pb-3 mb-3">
+          <h1 class="text-xl font-bold text-gray-800"><%= companyName %></h1>
+          <p class="text-sm text-gray-600 mt-1">Asset Label</p>
+        </div>
+
+        <!-- Asset ID with larger emphasis -->
+        <div class="text-center mb-4 bg-gray-100 py-3 rounded-lg">
+          <p class="text-xs text-gray-600 font-semibold">ASSET ID</p>
+          <p class="text-2xl font-bold text-gray-900">#<%= asset.id.toString().padStart(5, '0') %></p>
+        </div>
+
+        <!-- Asset Name -->
+        <div class="mb-3">
+          <p class="text-xs text-gray-600 font-semibold mb-1">ASSET NAME</p>
+          <p class="text-lg font-bold text-gray-900"><%= asset.name %></p>
+        </div>
+
+        <!-- Category Badge -->
+        <div class="mb-3">
+          <p class="text-xs text-gray-600 font-semibold mb-1">CATEGORY</p>
+          <span class="inline-block px-3 py-1 text-sm rounded-full bg-blue-100 text-blue-800 font-semibold">
+            <%= asset.category %>
+          </span>
+        </div>
+
+        <!-- Serial Number -->
+        <div class="mb-3">
+          <p class="text-xs text-gray-600 font-semibold mb-1">SERIAL NUMBER</p>
+          <p class="text-base font-mono font-bold text-gray-900"><%= asset.serialNumber %></p>
+        </div>
+
+        <!-- Location -->
+        <div class="mb-3">
+          <p class="text-xs text-gray-600 font-semibold mb-1">LOCATION</p>
+          <p class="text-base font-semibold text-gray-900"><%= asset.location %></p>
+        </div>
+
+        <!-- Status -->
+        <div class="mb-3">
+          <p class="text-xs text-gray-600 font-semibold mb-1">STATUS</p>
+          <span class="inline-block px-2 py-1 text-xs rounded-full <%= asset.status === 'Active' ? 'bg-green-100 text-green-800' : asset.status === 'Under Maintenance' ? 'bg-yellow-100 text-yellow-800' : 'bg-red-100 text-red-800' %> font-semibold">
+            <%= asset.status %>
+          </span>
+        </div>
+
+        <!-- Barcode -->
+        <div class="mt-auto text-center border-t-2 border-gray-300 pt-2 flex justify-center">
+          <svg id="barcode"></svg>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Generate barcode using the asset ID
+    JsBarcode("#barcode", "<%= asset.id.toString().padStart(8, '0') %>", {
+      format: "CODE128",
+      width: 1.2,
+      height: 40,
+      displayValue: true,
+      fontSize: 10,
+      margin: 0,
+      textAlign: "center"
+    });
+  </script>
+</body>
+</html>
